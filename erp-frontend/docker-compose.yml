@@ -5,10 +5,9 @@ services:
     build: ./frontend
     container_name: cruz_azul_frontend
     ports:
-      - "80:3000" # Mapea el puerto 80 del servidor al 3000 del contenedor
+      - "80:3000" 
     environment:
-      # IMPORTANTE: Cambia este valor por la IPv4 Privada de la EC2 de Base de Datos
-      DB_HOST: "172.x.x.x" 
+      DB_HOST: "172.x.x.x" # ip de la base de datos 
       DB_NAME: cruz_azul_db
       DB_USER: farmacia_user
       DB_PASSWORD: CruzAzul2024!
