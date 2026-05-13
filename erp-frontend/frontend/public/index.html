@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cruz Azul ERP</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+    h1 { color: #1a5276; }
+    h2 { color: #2874a6; margin-top: 30px; }
+    input, select { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 8px 20px; background: #1a5276; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #2874a6; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th { background: #1a5276; color: white; padding: 10px; }
+    td { padding: 8px; border-bottom: 1px solid #ddd; text-align: center; }
+    tr:hover { background: #f0f8ff; }
+    .msg { padding: 10px; border-radius: 4px; margin: 10px 0; }
+    .ok  { background: #d5f5e3; color: #1e8449; }
+    .err { background: #fadbd8; color: #922b21; }
+  </style>
+</head>
+<body>
+  <h1>Cruz Azul — Sistema ERP de Productos</h1>
+
+  <h2>Agregar Producto</h2>
+  <div>
+    <input id="nombre"      placeholder="Nombre"      />
+    <input id="descripcion" placeholder="Descripción" />
+    <input id="precio"      placeholder="Precio"   type="number" />
+    <input id="stock"       placeholder="Stock"    type="number" />
+    <select id="categoria">
+      <option value="">-- Categoría --</option>
+      <option>Analgésicos</option>
+      <option>Antibióticos</option>
+      <option>Vitaminas</option>
+      <option>Antiinflamatorios</option>
+      <option>Otros</option>
+    </select>
+    <button onclick="agregar()">Agregar</button>
+  </div>
+  <div id="msg"></div>
+
+  <h2>Listado de Productos</h2>
+  <button onclick="cargar()">Actualizar</button>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Nombre</th><th>Descripción</th><th>Precio</th><th>Stock</th><th>Categoría</th></tr>
+    </thead>
+    <tbody id="tabla"></tbody>
+  </table>
+
+  <script>
+    async function cargar() {
+      const res = await fetch('/api/productos');
+      const data = await res.json();
+      const tbody = document.getElementById('tabla');
+      tbody.innerHTML = data.map(p => `
+        <tr>
+          <td>${p.id}</td>
+          <td>${p.nombre}</td>
+          <td>${p.descripcion || '-'}</td>
+          <td>$${Number(p.precio).toLocaleString('es-CL')}</td>
+          <td>${p.stock}</td>
+          <td>${p.categoria || '-'}</td>
+        </tr>`).join('');
+    }
+
+    async function agregar() {
+      const body = {
+        nombre:      document.getElementById('nombre').value,
+        descripcion: document.getElementById('descripcion').value,
+        precio:      document.getElementById('precio').value,
+        stock:       document.getElementById('stock').value,
+        categoria:   document.getElementById('categoria').value
+      };
+      const res = await fetch('/api/productos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const msg = document.getElementById('msg');
+      if (res.ok) {
+        msg.className = 'msg ok';
+        msg.textContent = 'Producto agregado correctamente';
+        cargar();
+      } else {
+        msg.className = 'msg err';
+        msg.textContent = 'Error al agregar producto';
+      }
+    }
+
+    cargar();
+  </script>
+</body>
+</html>
