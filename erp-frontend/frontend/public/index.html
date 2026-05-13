@@ -2,93 +2,192 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Cruz Azul ERP</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
-    h1 { color: #1a5276; }
-    h2 { color: #2874a6; margin-top: 30px; }
-    input, select { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; }
-    button { padding: 8px 20px; background: #1a5276; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #2874a6; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th { background: #1a5276; color: white; padding: 10px; }
-    td { padding: 8px; border-bottom: 1px solid #ddd; text-align: center; }
-    tr:hover { background: #f0f8ff; }
-    .msg { padding: 10px; border-radius: 4px; margin: 10px 0; }
-    .ok  { background: #d5f5e3; color: #1e8449; }
-    .err { background: #fadbd8; color: #922b21; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cruz Azul ERP | Farmacia</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-  <h1>Cruz Azul — Sistema ERP de Productos</h1>
+  <div class="container">
+    <!-- Header con logo y título -->
+    <header class="main-header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <i class="fas fa-prescription-bottle"></i>
+        </div>
+        <div class="logo-text">
+          <h1>Cruz Azul</h1>
+          <span>Sistema ERP · Gestión Farmacéutica</span>
+        </div>
+      </div>
+      <div class="header-badge">
+        <i class="fas fa-shopping-cart"></i> Inventario Activo
+      </div>
+    </header>
 
-  <h2>Agregar Producto</h2>
-  <div>
-    <input id="nombre"      placeholder="Nombre"      />
-    <input id="descripcion" placeholder="Descripción" />
-    <input id="precio"      placeholder="Precio"   type="number" />
-    <input id="stock"       placeholder="Stock"    type="number" />
-    <select id="categoria">
-      <option value="">-- Categoría --</option>
-      <option>Analgésicos</option>
-      <option>Antibióticos</option>
-      <option>Vitaminas</option>
-      <option>Antiinflamatorios</option>
-      <option>Otros</option>
-    </select>
-    <button onclick="agregar()">Agregar</button>
+    <!-- Tarjeta de agregar producto -->
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-plus-circle"></i>
+        <h2>Agregar Nuevo Producto</h2>
+      </div>
+      <div class="card-body">
+        <form id="productoForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label><i class="fas fa-tag"></i> Nombre</label>
+              <input type="text" id="nombre" placeholder="Ej. Paracetamol 500mg" required>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-align-left"></i> Descripción</label>
+              <input type="text" id="descripcion" placeholder="Ej. Caja con 20 comprimidos">
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-dollar-sign"></i> Precio (CLP)</label>
+              <input type="number" id="precio" placeholder="0" step="any" required>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-boxes"></i> Stock</label>
+              <input type="number" id="stock" placeholder="0" required>
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-list"></i> Categoría</label>
+              <select id="categoria">
+                <option value="">-- Seleccionar --</option>
+                <option>Analgésicos</option>
+                <option>Antibióticos</option>
+                <option>Vitaminas</option>
+                <option>Antiinflamatorios</option>
+                <option>Otros</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-primary" onclick="agregar()">
+              <i class="fas fa-save"></i> Registrar Producto
+            </button>
+          </div>
+        </form>
+        <div id="msg"></div>
+      </div>
+    </div>
+
+    <!-- Tarjeta de listado de productos -->
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-table-list"></i>
+        <h2>Inventario de Productos</h2>
+        <button onclick="cargar()" class="btn-refresh">
+          <i class="fas fa-sync-alt"></i> Actualizar
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="table-wrapper">
+          <table id="productosTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Categoría</th>
+              </tr>
+            </thead>
+            <tbody id="tabla">
+              <tr class="loading-row">
+                <td colspan="6"><i class="fas fa-spinner fa-spin"></i> Cargando productos...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
-  <div id="msg"></div>
-
-  <h2>Listado de Productos</h2>
-  <button onclick="cargar()">Actualizar</button>
-  <table>
-    <thead>
-      <tr><th>ID</th><th>Nombre</th><th>Descripción</th><th>Precio</th><th>Stock</th><th>Categoría</th></tr>
-    </thead>
-    <tbody id="tabla"></tbody>
-  </table>
 
   <script>
     async function cargar() {
-      const res = await fetch('/api/productos');
-      const data = await res.json();
       const tbody = document.getElementById('tabla');
-      tbody.innerHTML = data.map(p => `
-        <tr>
-          <td>${p.id}</td>
-          <td>${p.nombre}</td>
-          <td>${p.descripcion || '-'}</td>
-          <td>$${Number(p.precio).toLocaleString('es-CL')}</td>
-          <td>${p.stock}</td>
-          <td>${p.categoria || '-'}</td>
-        </tr>`).join('');
+      tbody.innerHTML = '<tr class="loading-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i> Cargando productos...</td></tr>';
+      
+      try {
+        const res = await fetch('/api/productos');
+        const data = await res.json();
+        
+        if (data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="empty-row"><i class="fas fa-box-open"></i> No hay productos registrados</td></tr>';
+          return;
+        }
+        
+        tbody.innerHTML = data.map(p => `
+          <tr>
+            <td class="id-cell">${p.id}</td>
+            <td class="product-name">${escapeHtml(p.nombre)}</td>
+            <td>${escapeHtml(p.descripcion || '-')}</td>
+            <td class="price-cell">$${Number(p.precio).toLocaleString('es-CL')}</td>
+            <td class="stock-cell ${p.stock < 10 ? 'low-stock' : ''}">
+              <i class="fas ${p.stock === 0 ? 'fa-times-circle' : (p.stock < 10 ? 'fa-exclamation-triangle' : 'fa-check-circle')}"></i>
+              ${p.stock}
+            </td>
+            <td><span class="category-badge">${escapeHtml(p.categoria || 'Sin categoría')}</span></td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="6" class="error-row"><i class="fas fa-exclamation-triangle"></i> Error al cargar productos</td></tr>';
+      }
     }
 
     async function agregar() {
       const body = {
-        nombre:      document.getElementById('nombre').value,
+        nombre: document.getElementById('nombre').value,
         descripcion: document.getElementById('descripcion').value,
-        precio:      document.getElementById('precio').value,
-        stock:       document.getElementById('stock').value,
-        categoria:   document.getElementById('categoria').value
+        precio: document.getElementById('precio').value,
+        stock: document.getElementById('stock').value,
+        categoria: document.getElementById('categoria').value
       };
+      
+      if (!body.nombre || !body.precio || !body.stock) {
+        mostrarMsg('Por favor completa los campos obligatorios (Nombre, Precio, Stock)', 'err');
+        return;
+      }
+      
       const res = await fetch('/api/productos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-      const msg = document.getElementById('msg');
+      
       if (res.ok) {
-        msg.className = 'msg ok';
-        msg.textContent = 'Producto agregado correctamente';
+        mostrarMsg('✓ Producto agregado correctamente', 'ok');
+        document.getElementById('productoForm').reset();
         cargar();
       } else {
-        msg.className = 'msg err';
-        msg.textContent = 'Error al agregar producto';
+        mostrarMsg('✗ Error al agregar producto', 'err');
       }
     }
-
+    
+    function mostrarMsg(texto, tipo) {
+      const msg = document.getElementById('msg');
+      msg.className = `msg ${tipo}`;
+      msg.innerHTML = `<i class="fas ${tipo === 'ok' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${texto}`;
+      setTimeout(() => {
+        msg.className = '';
+        msg.innerHTML = '';
+      }, 3000);
+    }
+    
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+    
+    // Cargar productos al iniciar
     cargar();
   </script>
 </body>
