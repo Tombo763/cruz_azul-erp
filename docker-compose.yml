@@ -1,0 +1,23 @@
+services:
+  db-server:
+    build: ./erp-db/database
+    container_name: db-server
+    environment:
+      - POSTGRES_DB=${DB_NAME:-cruz_azul_db}
+      - POSTGRES_USER=${DB_USER:-farmacia_user}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-CruzAzul2024!}
+    ports:
+      - "5432:5432"
+
+  frontend:
+    build: ./erp-frontend/frontend
+    container_name: frontend-app
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=${DB_HOST:-db-server}
+      - DB_USER=${DB_USER:-farmacia_user}
+      - DB_PASSWORD=${DB_PASSWORD:-CruzAzul2024!}
+      - DB_NAME=${DB_NAME:-cruz_azul_db}
+    depends_on:
+      - db-server
